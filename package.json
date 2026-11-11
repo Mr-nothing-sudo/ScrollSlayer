@@ -1,0 +1,34 @@
+{
+  "name": "scrollslayer",
+  "version": "1.0.0",
+  "description": "ScrollSlayer - Screen Time and Scroll Blocker",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "android": "SCROLLSLAYER_LIVE_RELOAD=1 npx cap run android --forwardPorts 5173:5173",
+    "sync": "npx cap sync android",
+    "sync:dev": "SCROLLSLAYER_LIVE_RELOAD=1 npx cap sync android",
+    "doctor": "npx cap doctor",
+    "cap:sync": "npx cap sync android",
+    "cap:build": "npm run build && npx cap sync android"
+  },
+  "keywords": [
+    "scrollslayer",
+    "capacitor",
+    "android"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^6.4.6"
+  }
+}

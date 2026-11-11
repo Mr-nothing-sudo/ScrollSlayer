@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101014">
+<title>ScrollSlayer</title>
+<script type="module">
+import { registerPlugin } from '@capacitor/core';
+
+window.ScrollSlayerNative = registerPlugin('ScrollSlayerNative');
+window.dispatchEvent(new Event('scrollslayer-native-ready'));
+</script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+ background:#101014;color:#fff;
+ font-family:Arial,sans-serif;
+ padding:18px;
+}
+
+.app{max-width:460px;margin:auto;padding-bottom:85px}
+
+header{
+ display:flex;justify-content:space-between;
+ align-items:center;margin:15px 0 30px;
+}
+
+.logo{font-size:24px;font-weight:bold;color:#a78bfa}
+.badge{font-size:10px;background:#292432;padding:8px 10px;border-radius:20px;color:#c4b5fd}
+
+h2{font-size:23px;margin-bottom:8px}
+.subtitle{color:#888;font-size:13px;margin-bottom:22px}
+
+.card{
+ background:#1c1b23;border:1px solid #302d3b;
+ padding:20px;border-radius:17px;margin-bottom:16px;
+}
+
+.muted{color:#888;font-size:13px}
+.small{font-size:11px;color:#888}
+
+.counter{text-align:center;padding:25px 15px}
+
+.count{font-size:65px;font-weight:bold;margin:15px 0}
+.count span{font-size:23px;color:#777}
+
+.progress{
+ height:9px;background:#35313f;
+ border-radius:20px;overflow:hidden;margin:20px 0 12px;
+}
+
+.progress-bar{
+ height:100%;width:0%;background:#a78bfa;
+ transition:width .3s;
+}
+
+button{
+ border:0;border-radius:10px;padding:13px;
+ cursor:pointer;font-weight:bold;
+}
+
+.primary{
+ width:100%;background:#a78bfa;color:#15121d;
+ margin-top:15px;
+}
+
+.secondary{background:#302d3b;color:white}
+.danger{background:#48272e;color:#ff9b9b}
+
+input{
+ width:100%;padding:15px;margin-top:12px;
+ background:#111016;border:1px solid #393544;
+ color:white;border-radius:10px;font-size:18px;
+}
+
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.app-row{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.app-info{display:flex;gap:12px;align-items:center}
+.icon{font-size:26px}
+
+.toggle{
+ width:45px;height:25px;border-radius:20px;
+ background:#444;position:relative;cursor:pointer;
+}
+.toggle:after{
+ content:"";position:absolute;width:19px;height:19px;
+ top:3px;left:3px;background:white;border-radius:50%;
+ transition:.2s;
+}
+.toggle.active{background:#a78bfa}
+.toggle.active:after{left:23px}
+
+nav{
+ position:fixed;bottom:0;left:0;width:100%;
+ background:#19171f;border-top:1px solid #302d3b;
+ display:flex;justify-content:center;z-index:5;
+}
+
+.nav-inner{
+ max-width:460px;width:100%;
+ display:flex;justify-content:space-around;padding:12px 5px;
+}
+
+.nav-item{
+ color:#777;text-align:center;font-size:11px;
+ cursor:pointer;padding:5px 12px;
+}
+.nav-item.active{color:#c4b5fd}
+.nav-item div{font-size:21px;margin-bottom:4px}
+
+.page{display:none}
+.page.active{display:block}
+
+.stat-grid{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:12px;margin-top:18px;
+}
+
+.stat{
+ background:#282531;padding:17px;border-radius:12px;
+}
+.stat strong{font-size:24px;display:block;margin-top:9px}
+
+.chart{
+ display:flex;justify-content:space-between;
+ align-items:end;height:155px;gap:8px;
+ margin-top:25px;
+}
+
+.bar-wrap{
+ flex:1;text-align:center;height:100%;
+ display:flex;flex-direction:column;
+ justify-content:end;align-items:center;gap:8px;
+}
+
+.bar{
+ width:100%;max-width:30px;
+ background:#8b6bdb;border-radius:7px 7px 2px 2px;
+ min-height:3px;
+}
+
+.day{font-size:10px;color:#888}
+
+.notice{
+ display:none;background:#382d1e;
+ border:1px solid #72532e;color:#ffc982;
+ padding:14px;border-radius:10px;
+ font-size:13px;margin-top:15px;
+}
+
+.status{color:#a78bfa;font-size:13px;margin-top:15px}
+
+.empty{
+ text-align:center;padding:30px 10px;color:#888;
+}
+
+.footer{text-align:center;color:#555;font-size:11px;margin:30px 0}
+
+/* FIRST TIME SETUP */
+
+.overlay{
+ position:fixed;inset:0;background:#101014;
+ display:flex;align-items:center;justify-content:center;
+ padding:25px;z-index:20;
+}
+
+.setup-box{
+ width:100%;max-width:390px;
+ background:#1c1b23;border:1px solid #393544;
+ padding:25px;border-radius:20px;
+}
+
+.setup-box h1{color:#a78bfa;margin-bottom:15px}
+.setup-box p{color:#999;font-size:14px;line-height:1.6}
+.setup-box input{margin:22px 0 5px}
+
+</style>
+</head>
+
+<body>
+
+<!-- FIRST TIME SETUP -->
+
+<div class="overlay" id="setup">
+
+ <div class="setup-box">
+
+  <h1>⚡ ScrollSlayer</h1>
+
+  <h2>Take back your attention.</h2>
+
+  <p>
+   How many Reels and Shorts do you want to watch every day?
+   Choose your own limit. You won't be able to increase it
+   immediately once it's saved.
+  </p>
+
+  <input
+   type="number"
+   id="firstLimit"
+   placeholder="Enter your daily limit"
+   min="1"
+   max="10000"
+  >
+
+  <button class="primary" onclick="initializeApp()">
+   Set My Daily Limit
+  </button>
+
+ </div>
+
+</div>
+
+
+<div class="app">
+
+<header>
+ <div class="logo">⚡ ScrollSlayer</div>
+ <div class="badge">PERSONAL EDITION</div>
+</header>
+
+
+<!-- DASHBOARD -->
+
+<section class="page active" id="dashboard">
+
+ <h2>Stay in control.</h2>
+ <p class="subtitle">Your attention belongs to you.</p>
+
+ <div class="card counter">
+
+  <p class="muted">TODAY'S REELS WATCHED</p>
+
+  <div class="count">
+   <span id="watched">0</span>
+   <span>/ <span id="limit">--</span></span>
+  </div>
+
+  <div class="progress">
+   <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <p class="muted" id="remaining">Loading...</p>
+
+  <p class="status" id="protectionStatus">
+   ● Waiting for Android integration
+  </p>
+
+  <p class="small" style="margin-top:15px">
+   Browser demonstration only
+  </p>
+
+ </div>
+
+ <div class="card">
+
+  <h3>Protected Applications</h3>
+
+  <div class="app-row">
+
+   <div class="app-info">
+    <span class="icon">📸</span>
+    <div>
+     <b>Instagram</b>
+     <p class="muted">Reels protection</p>
+    </div>
+   </div>
+
+   <div class="toggle active" id="instagramToggle"
+    onclick="toggleApp('instagram')"></div>
+
+  </div>
+
+  <div class="app-row">
+
+   <div class="app-info">
+    <span class="icon">▶️</span>
+    <div>
+     <b>YouTube</b>
+     <p class="muted">Shorts protection</p>
+    </div>
+   </div>
+
+   <div class="toggle active" id="youtubeToggle"
+    onclick="toggleApp('youtube')"></div>
+
+  </div>
+
+ </div>
+
+</section>
+
+
+<!-- WEEKLY PREVIEW -->
+
+<section class="page" id="weekly">
+
+ <h2>Weekly Preview</h2>
+ <p class="subtitle">Understand your scrolling habits.</p>
+
+ <div class="stat-grid">
+
+  <div class="stat">
+   <p class="muted">Total Reels</p>
+   <strong id="weeklyTotal">0</strong>
+  </div>
+
+  <div class="stat">
+   <p class="muted">Daily Average</p>
+   <strong id="weeklyAverage">0</strong>
+  </div>
+
+  <div class="stat">
+   <p class="muted">Best Day</p>
+   <strong id="bestDay">--</strong>
+  </div>
+
+  <div class="stat">
+   <p class="muted">Daily Limit</p>
+   <strong id="weeklyLimit">--</strong>
+  </div>
+
+ </div>
+
+ <div class="card" style="margin-top:18px">
+
+  <h3>Last 7 Days</h3>
+
+  <p class="muted" style="margin-top:7px">
+   Reels watched each day
+  </p>
+
+  <div class="chart" id="weeklyChart"></div>
+
+ </div>
+
+ <div class="card">
+
+  <h3>Activity Source</h3>
+
+  <div class="app-row">
+   <span class="muted">Instagram Reels</span>
+   <b id="instagramWeekly">0</b>
+  </div>
+
+  <div class="app-row">
+   <span class="muted">YouTube Shorts</span>
+   <b id="youtubeWeekly">0</b>
+  </div>
+
+  <p class="small" style="margin-top:18px">
+   Statistics will be collected locally by the Android
+   Accessibility Service. No analytics subscription required.
+  </p>
+
+ </div>
+
+</section>
+
+
+<!-- SETTINGS -->
+
+<section class="page" id="settings">
+
+ <h2>Settings</h2>
+ <p class="subtitle">Configure your self-control rules.</p>
+
+ <div class="card">
+
+  <h3>Daily Scroll Limit</h3>
+
+  <p class="muted" style="margin-top:10px">
+   Enter your desired daily Reel limit.
+  </p>
+
+  <input
+   type="number"
+   id="newLimit"
+   placeholder="Enter number of Reels"
+   min="1"
+   max="10000"
+  >
+
+  <button class="primary" onclick="changeLimit()">
+   Save New Limit
+  </button>
+
+  <div class="notice" id="notice"></div>
+
+ </div>
+
+ <div class="card">
+
+  <h3>⏳ Anti-Impulse Protection</h3>
+
+  <p class="muted" style="margin-top:12px;line-height:1.6">
+   Increasing your daily limit requires a mandatory
+   24-hour waiting period.
+   Reducing your limit takes effect immediately.
+  </p>
+
+  <div id="timer" class="status">
+   No pending changes.
+  </div>
+
+ </div>
+
+ <div class="card">
+
+  <h3>Android Feed Protection</h3>
+
+  <p class="muted" id="nativeProtectionStatus" style="margin-top:10px">
+   Checking Accessibility Service status...
+  </p>
+
+  <p class="small" style="margin-top:10px;line-height:1.6">
+   Enable ScrollSlayer in Android Accessibility settings to show a count popup
+   when Reels or Shorts open and block those feeds at your limit.
+  </p>
+
+  <button class="primary" onclick="enableNativeProtection()">
+   Open Accessibility Settings
+  </button>
+
+ </div>
+
+ <div class="card">
+
+  <h3>Protection Rules</h3>
+
+  <div class="app-row">
+   <span class="muted">24-hour increase delay</span>
+   <b>ON</b>
+  </div>
+
+  <div class="app-row">
+   <span class="muted">Immediate limit reduction</span>
+   <b>ON</b>
+  </div>
+
+  <div class="app-row">
+   <span class="muted">Local data storage</span>
+   <b>ON</b>
+  </div>
+
+ </div>
+
+</section>
+
+
+<!-- NAVIGATION -->
+
+<nav>
+ <div class="nav-inner">
+
+  <div class="nav-item active" onclick="showPage('dashboard',this)">
+   <div>⌂</div>
+   Home
+  </div>
+
+  <div class="nav-item" onclick="showPage('weekly',this)">
+   <div>▥</div>
+   Weekly
+  </div>
+
+  <div class="nav-item" onclick="showPage('settings',this)">
+   <div>⚙</div>
+   Settings
+  </div>
+
+ </div>
+</nav>
+
+</div>
+
+
+<script>
+
+// =====================================
+// SCROLLSLAYER - FRONTEND VERSION
+// =====================================
+
+let watched = 0;
+let limit = null;
+let pending = null;
+
+let activity = {};
+let appEnabled = {
+ instagram:true,
+ youtube:true
+};
+
+const STORAGE = {
+ limit:"ss_limit",
+ watched:"ss_watched",
+ date:"ss_date",
+ pending:"ss_pending",
+ activity:"ss_activity",
+ apps:"ss_apps"
+};
+
+function today(){
+ return new Date().toLocaleDateString("en-CA");
+}
+
+function loadData(){
+
+ limit = Number(localStorage.getItem(STORAGE.limit)) || null;
+
+ watched = Number(localStorage.getItem(STORAGE.watched)) || 0;
+
+ pending = JSON.parse(
+  localStorage.getItem(STORAGE.pending) || "null"
+ );
+
+ activity = JSON.parse(
+  localStorage.getItem(STORAGE.activity) || "{}"
+ );
+
+ appEnabled = JSON.parse(
+  localStorage.getItem(STORAGE.apps) ||
+  '{"instagram":true,"youtube":true}'
+ );
+
+ if(!activity[today()]){
+  activity[today()] = {
+   instagram:0,
+   youtube:0
+  };
+ }
+
+ if(localStorage.getItem(STORAGE.date) !== today()){
+
+  watched = 0;
+
+  localStorage.setItem(STORAGE.date,today());
+
+  localStorage.setItem(STORAGE.watched,0);
+
+ }
+
+ if(!limit){
+
+  document.getElementById("setup").style.display="flex";
+
+ }else{
+
+  document.getElementById("setup").style.display="none";
+
+ }
+
+ saveData();
+ updateUI();
+
+}
+
+function saveData(){
+
+ localStorage.setItem(STORAGE.limit,limit || "");
+
+ localStorage.setItem(STORAGE.watched,watched);
+
+ localStorage.setItem(STORAGE.pending,JSON.stringify(pending));
+
+ localStorage.setItem(STORAGE.activity,JSON.stringify(activity));
+
+ localStorage.setItem(STORAGE.apps,JSON.stringify(appEnabled));
+
+ localStorage.setItem(STORAGE.date,today());
+
+ syncNativeSettings();
+
+}
+
+async function syncNativeSettings(){
+
+ if(!window.ScrollSlayerNative)return;
+
+ try{
+  await window.ScrollSlayerNative.syncSettings({
+   limit:limit || 0,
+   pendingLimit:pending ? pending.value : 0,
+   pendingAt:pending ? pending.applyAt : 0,
+   instagram:appEnabled.instagram,
+   youtube:appEnabled.youtube
+  });
+ }catch(error){
+  console.error("Could not sync ScrollSlayer settings with Android:",error);
+ }
+
+}
+
+async function refreshNativeStatus(){
+
+ if(!window.ScrollSlayerNative)return;
+
+ try{
+  const status=await window.ScrollSlayerNative.getWeeklyStats();
+  document.getElementById("nativeProtectionStatus").innerText=
+   status.accessibilityEnabled
+   ? "● Android Accessibility protection is enabled."
+   : "○ Android Accessibility protection is not enabled yet.";
+ }catch(error){
+  console.error("Could not check Android Accessibility status:",error);
+ }
+
+}
+
+async function enableNativeProtection(){
+
+ if(!window.ScrollSlayerNative){
+  alert("Native Android protection is available in the installed app.");
+  return;
+ }
+
+ try{
+  await window.ScrollSlayerNative.openAccessibilitySettings();
+ }catch(error){
+  console.error("Could not open Android Accessibility settings:",error);
+  alert("Could not open Android Accessibility settings.");
+ }
+
+}
+
+function initializeApp(){
+
+ let value = Number(
+  document.getElementById("firstLimit").value
+ );
+
+ if(!Number.isInteger(value) || value < 1 || value > 10000){
+  alert("Enter a valid limit between 1 and 10000.");
+  return;
+ }
+
+ limit = value;
+ watched = 0;
+ pending = null;
+
+ saveData();
+
+ document.getElementById("setup").style.display="none";
+
+ updateUI();
+
+}
+
+function changeLimit(){
+
+ let value = Number(
+  document.getElementById("newLimit").value
+ );
+
+ let notice = document.getElementById("notice");
+
+ if(!Number.isInteger(value) || value < 1 || value > 10000){
+  alert("Enter a valid number between 1 and 10000.");
+  return;
+ }
+
+ if(pending){
+  alert("A limit increase is already pending. Wait for it to activate.");
+  return;
+ }
+
+ if(value === limit){
+  notice.style.display="block";
+  notice.innerText="Your limit has not changed.";
+  return;
+ }
+
+ if(value > limit){
+
+  pending = {
+   value:value,
+   applyAt:Date.now() + 86400000
+  };
+
+  notice.innerText =
+   "Your increased limit is scheduled. Wait 24 hours.";
+
+ }else{
+
+  limit = value;
+
+  notice.innerText =
+   "Your reduced limit is active immediately.";
+
+ }
+
+ notice.style.display="block";
+
+ saveData();
+ updateUI();
+
+}
+
+function updateUI(){
+
+ if(!limit)return;
+
+ document.getElementById("watched").innerText=watched;
+
+ document.getElementById("limit").innerText=limit;
+
+ document.getElementById("newLimit").value=limit;
+
+ let percent=Math.min((watched/limit)*100,100);
+
+ document.getElementById("progress").style.width=percent+"%";
+
+ document.getElementById("remaining").innerText=
+  Math.max(0,limit-watched)+" Reels remaining";
+
+ document.getElementById("protectionStatus").innerText=
+  watched>=limit
+  ? "⛔ Daily limit completed"
+  : "● Daily limit active";
+
+ document.getElementById("instagramToggle").classList.toggle(
+  "active",appEnabled.instagram
+ );
+
+ document.getElementById("youtubeToggle").classList.toggle(
+  "active",appEnabled.youtube
+ );
+
+ updateWeekly();
+
+ checkPending();
+
+}
+
+function toggleApp(name){
+
+ appEnabled[name]=!appEnabled[name];
+
+ saveData();
+ updateUI();
+
+}
+
+function updateWeekly(){
+
+ let dates=[];
+
+ for(let i=6;i>=0;i--){
+
+  let d=new Date();
+
+  d.setDate(d.getDate()-i);
+
+  dates.push(d.toLocaleDateString("en-CA"));
+
+ }
+
+ let total=0;
+ let instagram=0;
+ let youtube=0;
+
+ let values=[];
+
+ dates.forEach(date=>{
+
+  let record=activity[date] || {
+   instagram:0,
+   youtube:0
+  };
+
+  let sum=record.instagram+record.youtube;
+
+  values.push(sum);
+
+  total+=sum;
+
+  instagram+=record.instagram;
+
+  youtube+=record.youtube;
+
+ });
+
+ document.getElementById("weeklyTotal").innerText=total;
+
+ document.getElementById("weeklyAverage").innerText=
+  Math.round(total/7);
+
+ document.getElementById("weeklyLimit").innerText=limit;
+
+ document.getElementById("instagramWeekly").innerText=instagram;
+
+ document.getElementById("youtubeWeekly").innerText=youtube;
+
+ let best=Math.max(...values);
+
+ let bestIndex=values.indexOf(best);
+
+ document.getElementById("bestDay").innerText=
+  best===0 ? "--" :
+  new Date(dates[bestIndex]).toLocaleDateString("en-US",{weekday:"short"});
+
+ let chart=document.getElementById("weeklyChart");
+
+ chart.innerHTML="";
+
+ let maximum=Math.max(...values,1);
+
+ dates.forEach((date,index)=>{
+
+  let height=Math.max(3,(values[index]/maximum)*115);
+
+  let day=new Date(date).toLocaleDateString(
+   "en-US",{weekday:"short"}
+  );
+
+  let wrap=document.createElement("div");
+
+  wrap.className="bar-wrap";
+
+  wrap.innerHTML=`
+   <span class="small">${values[index]}</span>
+   <div class="bar" style="height:${height}px"></div>
+   <span class="day">${day}</span>
+  `;
+
+  chart.appendChild(wrap);
+
+ });
+
+}
+
+function checkPending(){
+
+ if(!pending){
+
+  document.getElementById("timer").innerText=
+   "No pending changes.";
+
+  return;
+
+ }
+
+ let remaining=pending.applyAt-Date.now();
+
+ if(remaining<=0){
+
+  limit=pending.value;
+
+  pending=null;
+
+  saveData();
+
+  document.getElementById("timer").innerText=
+   "Your new limit is active.";
+
+  updateUI();
+
+  return;
+
+ }
+
+ let h=Math.floor(remaining/3600000);
+
+ let m=Math.floor((remaining%3600000)/60000);
+
+ let s=Math.floor((remaining%60000)/1000);
+
+ document.getElementById("timer").innerText=
+  "New limit: "+pending.value+
+  " | Available in "+h+"h "+m+"m "+s+"s";
+
+}
+
+function showPage(page,element){
+
+ document.querySelectorAll(".page").forEach(p=>{
+  p.classList.remove("active");
+ });
+
+ document.getElementById(page).classList.add("active");
+
+ document.querySelectorAll(".nav-item").forEach(n=>{
+  n.classList.remove("active");
+ });
+
+ element.classList.add("active");
+
+ if(page==="weekly")updateWeekly();
+
+}
+
+// =====================================
+// FUTURE ANDROID NATIVE CONNECTION
+// =====================================
+
+async function loadNativeStatistics(){
+
+ if(!window.ScrollSlayerNative)return;
+
+ try{
+
+  const stats=await window.ScrollSlayerNative.getWeeklyStats();
+
+  if(stats.limit>0){
+   limit=stats.limit;
+   watched=stats.today;
+   document.getElementById("watched").innerText=watched;
+   document.getElementById("limit").innerText=limit;
+   document.getElementById("progress").style.width=
+    Math.min((watched/limit)*100,100)+"%";
+   document.getElementById("remaining").innerText=
+    Math.max(0,limit-watched)+" Reels remaining";
+   document.getElementById("protectionStatus").innerText=
+    watched>=limit ? "⛔ Daily limit completed" : "● Daily limit active";
+  }
+
+  document.getElementById("weeklyTotal").innerText=stats.weeklyTotal;
+  document.getElementById("weeklyAverage").innerText=
+   Math.round(stats.weeklyTotal/7);
+  document.getElementById("instagramWeekly").innerText=stats.instagramWeekly;
+  document.getElementById("youtubeWeekly").innerText=stats.youtubeWeekly;
+  refreshNativeStatus();
+
+ }catch(error){
+
+  console.error("Native statistics unavailable:",error);
+
+ }
+
+}
+
+loadData();
+
+if(window.ScrollSlayerNative){
+ syncNativeSettings();
+ loadNativeStatistics();
+}else{
+ window.addEventListener("scrollslayer-native-ready",()=>{
+  syncNativeSettings();
+  loadNativeStatistics();
+ },{once:true});
+}
+
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="visible"){
+  loadNativeStatistics();
+ }
+});
+
+setInterval(checkPending,1000);
+
+</script>
+
+</body>
+</html>
